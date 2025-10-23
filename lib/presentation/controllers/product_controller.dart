@@ -106,15 +106,4 @@ class ProductController extends GetxController {
     errorMessage.value = '';
     pagingController.retryLastFailedRequest();
   }
-
-  // Get product details by handler
-  Future<void> getProductDetails(String handler) async {
-    try {
-      final product = await _productRepository.getProductByHandler(handler);
-      selectedProduct.value = product;
-    } catch (e) {
-      hasError.value = true;
-      errorMessage.value = e.toString();
-    }
-  }
 }
