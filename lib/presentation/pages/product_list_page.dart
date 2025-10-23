@@ -136,8 +136,8 @@ class _ProductListPageState extends State<ProductListPage> {
                         const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           childAspectRatio: 0.7,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 3,
+                          mainAxisSpacing: 3,
                         ),
                     builderDelegate: PagedChildBuilderDelegate<Product>(
                       itemBuilder: (context, product, index) =>
@@ -166,104 +166,120 @@ class _ProductListPageState extends State<ProductListPage> {
         ? '${AppConstants.imageBaseUrl}/${product.thumbnail}'
         : '';
 
-    return GestureDetector(
-      onTap: () => Get.toNamed('/product-detail', arguments: product),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Product Image
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(12),
-                ),
-                child: CachedNetworkImage(
-                  imageUrl: image,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: Colors.grey[300]!,
-                    highlightColor: Colors.grey[100]!,
-                    child: Container(color: Colors.white),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: Colors.grey[200],
-                    child: const Icon(Icons.image_not_supported, size: 50),
-                  ),
-                ),
-              ),
+    return Stack(
+      alignment: Alignment.topRight,
+      children: [
+        GestureDetector(
+          onTap: () => Get.toNamed('/product-detail', arguments: product),
+          child: Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
-
-            // Product Info
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product Image
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-
-                  // Star Rating
-                  if (product.rating > 0)
-                    Row(
-                      children: [
-                        RatingBarIndicator(
-                          rating: product.rating,
-                          itemBuilder: (context, index) =>
-                              const Icon(Icons.star, color: Colors.amber),
-                          itemCount: 5,
-                          itemSize: 16.0,
-                          direction: Axis.horizontal,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${product.rating.toStringAsFixed(1)} (${product.reviewCount})',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                  const SizedBox(height: 6),
-                  Text(
-                    '\$${product.effectivePrice.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  if (product.stock < 10 && product.stock > 0)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        'Only ${product.stock} left',
-                        style: TextStyle(
-                          color: Colors.orange[700],
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
+                    child: CachedNetworkImage(
+                      imageUrl: image,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(color: Colors.white),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.image_not_supported, size: 50),
                       ),
                     ),
-                ],
-              ),
+                  ),
+                ),
+
+                // Product Info
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        product.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                          fontSize: 12,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Star Rating
+                      if (product.rating > 0)
+                        Row(
+                          children: [
+                            RatingBarIndicator(
+                              rating: product.rating,
+                              itemBuilder: (context, index) =>
+                                  const Icon(Icons.star, color: Colors.black),
+                              itemCount: 5,
+                              itemSize: 16.0,
+                              direction: Axis.horizontal,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${product.rating.toStringAsFixed(1)} (${product.reviewCount})',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                      const SizedBox(height: 6),
+                      Text(
+                        '\$${product.effectivePrice.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      if (product.stock < 10 && product.stock > 0)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            'Only ${product.stock} left',
+                            style: TextStyle(
+                              color: Colors.orange[700],
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(
+            weight: 1.1,
+            Icons.favorite_border_sharp,
+            color: Colors.black54,
+          ),
+        ),
+      ],
     );
   }
 
