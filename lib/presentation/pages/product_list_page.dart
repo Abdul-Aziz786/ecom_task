@@ -1,3 +1,4 @@
+import 'package:ecom/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -93,6 +94,10 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 
   Widget _buildProductCard(Product product) {
+    var image = product.images.isNotEmpty
+        ? '${AppConstants.imageBaseUrl}/${product.thumbnail}'
+        : '';
+
     return GestureDetector(
       onTap: () => Get.toNamed('/product-detail', arguments: product),
       child: Card(
@@ -108,9 +113,7 @@ class _ProductListPageState extends State<ProductListPage> {
                   top: Radius.circular(12),
                 ),
                 child: CachedNetworkImage(
-                  imageUrl: product.images.isNotEmpty
-                      ? product.images.first
-                      : '',
+                  imageUrl: image,
                   width: double.infinity,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Shimmer.fromColors(
