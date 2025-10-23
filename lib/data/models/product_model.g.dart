@@ -7,39 +7,41 @@ part of 'product_model.dart';
 // **************************************************************************
 
 Product _$ProductFromJson(Map<String, dynamic> json) => Product(
-  id: json['id'] as String,
-  title: json['title'] as String,
+  id: json['id'] as String?,
+  title: json['title'] as String?,
   subtitle: json['subtitle'] as String?,
   description: json['description'] as String?,
   thumbnail: json['thumbnail'] as String?,
-  handle: json['handle'] as String,
+  handle: json['handle'] as String?,
   metaTitle: json['metaTitle'] as String?,
   metaDescription: json['metaDescription'] as String?,
-  status: json['status'] as String,
+  status: json['status'] as String?,
   brandId: json['brandId'] as String?,
-  visibility: json['visibility'] as String,
-  reviewsCount: (json['reviewsCount'] as num).toInt(),
+  visibility: json['visibility'] as String?,
+  reviewsCount: (json['reviewsCount'] as num?)?.toInt(),
   averageRating: (json['averageRating'] as num?)?.toDouble(),
-  ordersCount: (json['ordersCount'] as num).toInt(),
-  createdAt: DateTime.parse(json['createdAt'] as String),
+  ordersCount: (json['ordersCount'] as num?)?.toInt(),
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
   updatedAt: json['updatedAt'] == null
       ? null
       : DateTime.parse(json['updatedAt'] as String),
   publishedAt: json['publishedAt'] == null
       ? null
       : DateTime.parse(json['publishedAt'] as String),
-  productImages: (json['productImages'] as List<dynamic>)
-      .map((e) => ProductImage.fromJson(e as Map<String, dynamic>))
+  productImages: (json['productImages'] as List<dynamic>?)
+      ?.map((e) => ProductImage.fromJson(e as Map<String, dynamic>))
       .toList(),
-  variants: (json['variants'] as List<dynamic>)
-      .map((e) => ProductVariant.fromJson(e as Map<String, dynamic>))
+  variants: (json['variants'] as List<dynamic>?)
+      ?.map((e) => ProductVariant.fromJson(e as Map<String, dynamic>))
       .toList(),
-  productCategories: (json['productCategories'] as List<dynamic>)
-      .map((e) => ProductCategory.fromJson(e as Map<String, dynamic>))
+  productCategories: (json['productCategories'] as List<dynamic>?)
+      ?.map((e) => ProductCategory.fromJson(e as Map<String, dynamic>))
       .toList(),
-  productCollections: json['productCollections'] as List<dynamic>,
-  tags: (json['tags'] as List<dynamic>)
-      .map((e) => ProductTag.fromJson(e as Map<String, dynamic>))
+  productCollections: json['productCollections'] as List<dynamic>?,
+  tags: (json['tags'] as List<dynamic>?)
+      ?.map((e) => ProductTag.fromJson(e as Map<String, dynamic>))
       .toList(),
   priceStart: (json['priceStart'] as num?)?.toDouble(),
   priceEnd: (json['priceEnd'] as num?)?.toDouble(),
@@ -92,16 +94,16 @@ Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
   'reviewsCount': instance.reviewsCount,
   'averageRating': instance.averageRating,
   'ordersCount': instance.ordersCount,
-  'createdAt': instance.createdAt.toIso8601String(),
+  'createdAt': instance.createdAt?.toIso8601String(),
   'updatedAt': instance.updatedAt?.toIso8601String(),
   'publishedAt': instance.publishedAt?.toIso8601String(),
-  'productImages': instance.productImages.map((e) => e.toJson()).toList(),
-  'variants': instance.variants.map((e) => e.toJson()).toList(),
+  'productImages': instance.productImages?.map((e) => e.toJson()).toList(),
+  'variants': instance.variants?.map((e) => e.toJson()).toList(),
   'productCategories': instance.productCategories
-      .map((e) => e.toJson())
+      ?.map((e) => e.toJson())
       .toList(),
   'productCollections': instance.productCollections,
-  'tags': instance.tags.map((e) => e.toJson()).toList(),
+  'tags': instance.tags?.map((e) => e.toJson()).toList(),
   'priceStart': instance.priceStart,
   'priceEnd': instance.priceEnd,
   'metadata': instance.metadata,
@@ -130,10 +132,10 @@ Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
 };
 
 ProductImage _$ProductImageFromJson(Map<String, dynamic> json) => ProductImage(
-  id: json['id'] as String,
+  id: json['id'] as String?,
   productId: json['productId'] as String?,
   order: (json['order'] as num?)?.toInt(),
-  image: json['image'] as String,
+  image: json['image'] as String?,
   productVariantId: json['productVariantId'] as String?,
   createdAt: json['createdAt'] == null
       ? null
@@ -156,12 +158,12 @@ Map<String, dynamic> _$ProductImageToJson(ProductImage instance) =>
 
 ProductVariant _$ProductVariantFromJson(Map<String, dynamic> json) =>
     ProductVariant(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       productId: json['productId'] as String?,
       sku: json['sku'] as String?,
       barcode: json['barcode'] as String?,
-      price: json['price'] as num,
-      specialPrice: json['specialPrice'] as num?,
+      price: _toNum(json['price']),
+      specialPrice: _toNum(json['specialPrice']),
       specialPriceStartDate: json['specialPriceStartDate'] == null
           ? null
           : DateTime.parse(json['specialPriceStartDate'] as String),
@@ -170,7 +172,7 @@ ProductVariant _$ProductVariantFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['specialPriceEndDate'] as String),
       title: json['title'] as String?,
       thumbnail: json['thumbnail'] as String?,
-      inventoryQuantity: (json['inventoryQuantity'] as num).toInt(),
+      inventoryQuantity: (json['inventoryQuantity'] as num?)?.toInt(),
       manageInventory: json['manageInventory'] as bool?,
       allowBackOrder: json['allowBackOrder'] as bool?,
       variantRank: (json['variantRank'] as num?)?.toInt(),
@@ -186,8 +188,8 @@ ProductVariant _$ProductVariantFromJson(Map<String, dynamic> json) =>
       optionValues: (json['optionValues'] as List<dynamic>?)
           ?.map((e) => OptionValue.fromJson(e as Map<String, dynamic>))
           .toList(),
-      originalPrice: json['originalPrice'] as num,
-      currentPrice: json['currentPrice'] as num,
+      originalPrice: _toNum(json['originalPrice']),
+      currentPrice: _toNum(json['currentPrice']),
       prices: json['prices'] as List<dynamic>?,
       metadata: json['metadata'] as Map<String, dynamic>?,
       deletedAt: json['deletedAt'] as String?,
@@ -206,7 +208,7 @@ ProductVariant _$ProductVariantFromJson(Map<String, dynamic> json) =>
       easyecomId: json['easyecomId'] as String?,
       easyecomSku: json['easyecomSku'] as String?,
       salePrices: json['salePrices'] as Map<String, dynamic>?,
-      specialPriceActive: json['specialPriceActive'] as num?,
+      specialPriceActive: _toNum(json['specialPriceActive']),
     );
 
 Map<String, dynamic> _$ProductVariantToJson(
@@ -254,13 +256,17 @@ Map<String, dynamic> _$ProductVariantToJson(
 };
 
 VariantImage _$VariantImageFromJson(Map<String, dynamic> json) => VariantImage(
-  id: json['id'] as String,
+  id: json['id'] as String?,
   productId: json['productId'] as String?,
-  order: (json['order'] as num).toInt(),
-  image: json['image'] as String,
+  order: (json['order'] as num?)?.toInt(),
+  image: json['image'] as String?,
   productVariantId: json['productVariantId'] as String?,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
 );
 
 Map<String, dynamic> _$VariantImageToJson(VariantImage instance) =>
@@ -270,17 +276,21 @@ Map<String, dynamic> _$VariantImageToJson(VariantImage instance) =>
       'order': instance.order,
       'image': instance.image,
       'productVariantId': instance.productVariantId,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt.toIso8601String(),
+      'createdAt': instance.createdAt?.toIso8601String(),
+      'updatedAt': instance.updatedAt?.toIso8601String(),
     };
 
 OptionValue _$OptionValueFromJson(Map<String, dynamic> json) => OptionValue(
-  id: json['id'] as String,
-  optionId: json['optionId'] as String,
-  value: json['value'] as String,
+  id: json['id'] as String?,
+  optionId: json['optionId'] as String?,
+  value: json['value'] as String?,
   variantId: json['variantId'] as String?,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
   deletedAt: json['deletedAt'] as String?,
   createdById: json['createdById'] as String?,
   metadata: json['metadata'] as Map<String, dynamic>?,
@@ -295,8 +305,8 @@ Map<String, dynamic> _$OptionValueToJson(OptionValue instance) =>
       'optionId': instance.optionId,
       'value': instance.value,
       'variantId': instance.variantId,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt.toIso8601String(),
+      'createdAt': instance.createdAt?.toIso8601String(),
+      'updatedAt': instance.updatedAt?.toIso8601String(),
       'deletedAt': instance.deletedAt,
       'createdById': instance.createdById,
       'metadata': instance.metadata,
@@ -305,11 +315,15 @@ Map<String, dynamic> _$OptionValueToJson(OptionValue instance) =>
 
 ProductOption _$ProductOptionFromJson(Map<String, dynamic> json) =>
     ProductOption(
-      id: json['id'] as String,
-      productId: json['productId'] as String,
-      title: json['title'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      id: json['id'] as String?,
+      productId: json['productId'] as String?,
+      title: json['title'] as String?,
+      createdAt: json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt'] as String),
+      updatedAt: json['updatedAt'] == null
+          ? null
+          : DateTime.parse(json['updatedAt'] as String),
       deletedAt: json['deletedAt'] as String?,
       createdById: json['createdById'] as String?,
       metadata: json['metadata'] as Map<String, dynamic>?,
@@ -323,8 +337,8 @@ Map<String, dynamic> _$ProductOptionToJson(ProductOption instance) =>
       'id': instance.id,
       'productId': instance.productId,
       'title': instance.title,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt.toIso8601String(),
+      'createdAt': instance.createdAt?.toIso8601String(),
+      'updatedAt': instance.updatedAt?.toIso8601String(),
       'deletedAt': instance.deletedAt,
       'createdById': instance.createdById,
       'metadata': instance.metadata,
@@ -333,16 +347,18 @@ Map<String, dynamic> _$ProductOptionToJson(ProductOption instance) =>
 
 ProductCategory _$ProductCategoryFromJson(Map<String, dynamic> json) =>
     ProductCategory(
-      category: Category.fromJson(json['category'] as Map<String, dynamic>),
+      category: json['category'] == null
+          ? null
+          : Category.fromJson(json['category'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$ProductCategoryToJson(ProductCategory instance) =>
-    <String, dynamic>{'category': instance.category.toJson()};
+    <String, dynamic>{'category': instance.category?.toJson()};
 
 Category _$CategoryFromJson(Map<String, dynamic> json) => Category(
-  id: json['id'] as String,
-  name: json['name'] as String,
-  handle: json['handle'] as String,
+  id: json['id'] as String?,
+  name: json['name'] as String?,
+  handle: json['handle'] as String?,
   parent: json['parent'] == null
       ? null
       : Category.fromJson(json['parent'] as Map<String, dynamic>),
@@ -356,10 +372,10 @@ Map<String, dynamic> _$CategoryToJson(Category instance) => <String, dynamic>{
 };
 
 ProductBrand _$ProductBrandFromJson(Map<String, dynamic> json) => ProductBrand(
-  id: json['id'] as String,
-  title: json['title'] as String,
+  id: json['id'] as String?,
+  title: json['title'] as String?,
   description: json['description'] as String?,
-  handle: json['handle'] as String,
+  handle: json['handle'] as String?,
   image: json['image'] as String?,
   status: json['status'] as String?,
   createdAt: json['createdAt'] == null
@@ -389,13 +405,17 @@ Map<String, dynamic> _$ProductBrandToJson(ProductBrand instance) =>
     };
 
 ProductTab _$ProductTabFromJson(Map<String, dynamic> json) => ProductTab(
-  id: json['id'] as String,
-  productId: json['productId'] as String,
-  title: json['title'] as String,
-  content: json['content'] as String,
-  position: (json['position'] as num).toInt(),
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  id: json['id'] as String?,
+  productId: json['productId'] as String?,
+  title: json['title'] as String?,
+  content: json['content'] as String?,
+  position: (json['position'] as num?)?.toInt(),
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
   deletedAt: json['deletedAt'] as String?,
   metadata: json['metadata'] as Map<String, dynamic>?,
 );
@@ -407,8 +427,8 @@ Map<String, dynamic> _$ProductTabToJson(ProductTab instance) =>
       'title': instance.title,
       'content': instance.content,
       'position': instance.position,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt.toIso8601String(),
+      'createdAt': instance.createdAt?.toIso8601String(),
+      'updatedAt': instance.updatedAt?.toIso8601String(),
       'deletedAt': instance.deletedAt,
       'metadata': instance.metadata,
     };
@@ -417,7 +437,9 @@ ProductTag _$ProductTagFromJson(Map<String, dynamic> json) => ProductTag(
   id: json['id'] as String?,
   productId: json['productId'] as String?,
   tagId: json['tagId'] as String?,
-  tag: Tag.fromJson(json['tag'] as Map<String, dynamic>),
+  tag: json['tag'] == null
+      ? null
+      : Tag.fromJson(json['tag'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ProductTagToJson(ProductTag instance) =>
@@ -425,13 +447,13 @@ Map<String, dynamic> _$ProductTagToJson(ProductTag instance) =>
       'id': instance.id,
       'productId': instance.productId,
       'tagId': instance.tagId,
-      'tag': instance.tag.toJson(),
+      'tag': instance.tag?.toJson(),
     };
 
 Tag _$TagFromJson(Map<String, dynamic> json) => Tag(
-  id: json['id'] as String,
-  title: json['title'] as String,
-  slug: json['slug'] as String,
+  id: json['id'] as String?,
+  title: json['title'] as String?,
+  slug: json['slug'] as String?,
   description: json['description'] as String?,
   createdAt: json['createdAt'] == null
       ? null
@@ -458,33 +480,37 @@ ProductAttributeValue _$ProductAttributeValueFromJson(
   Map<String, dynamic> json,
 ) => ProductAttributeValue(
   value: json['value'] as String?,
-  productAttribute: ProductAttribute.fromJson(
-    json['productAttribute'] as Map<String, dynamic>,
-  ),
-  productAttributeValue: AttributeValue.fromJson(
-    json['productAttributeValue'] as Map<String, dynamic>,
-  ),
+  productAttribute: json['productAttribute'] == null
+      ? null
+      : ProductAttribute.fromJson(
+          json['productAttribute'] as Map<String, dynamic>,
+        ),
+  productAttributeValue: json['productAttributeValue'] == null
+      ? null
+      : AttributeValue.fromJson(
+          json['productAttributeValue'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$ProductAttributeValueToJson(
   ProductAttributeValue instance,
 ) => <String, dynamic>{
   'value': instance.value,
-  'productAttribute': instance.productAttribute.toJson(),
-  'productAttributeValue': instance.productAttributeValue.toJson(),
+  'productAttribute': instance.productAttribute?.toJson(),
+  'productAttributeValue': instance.productAttributeValue?.toJson(),
 };
 
 ProductAttribute _$ProductAttributeFromJson(Map<String, dynamic> json) =>
     ProductAttribute(
-      code: json['code'] as String,
-      title: json['title'] as String,
+      code: json['code'] as String?,
+      title: json['title'] as String?,
     );
 
 Map<String, dynamic> _$ProductAttributeToJson(ProductAttribute instance) =>
     <String, dynamic>{'code': instance.code, 'title': instance.title};
 
 AttributeValue _$AttributeValueFromJson(Map<String, dynamic> json) =>
-    AttributeValue(value: json['value'] as String);
+    AttributeValue(value: json['value'] as String?);
 
 Map<String, dynamic> _$AttributeValueToJson(AttributeValue instance) =>
     <String, dynamic>{'value': instance.value};

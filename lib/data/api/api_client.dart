@@ -35,8 +35,7 @@ class ApiClient {
 
     // Add interceptors
     _dio.interceptors.addAll([
-      _loggingInterceptor(),
-      _authInterceptor(),
+      // _loggingInterceptor(),
       _retryInterceptor(),
       _errorInterceptor(),
     ]);
@@ -69,20 +68,6 @@ Message: ${error.message}
 Data: ${error.response?.data}
         ''');
         handler.next(error);
-      },
-    );
-  }
-
-  /// Auth interceptor for adding tokens
-  Interceptor _authInterceptor() {
-    return InterceptorsWrapper(
-      onRequest: (options, handler) {
-        // Add auth token if available (mocked for now)
-        // final token = StorageService().getToken();
-        // if (token != null) {
-        //   options.headers['Authorization'] = 'Bearer $token';
-        // }
-        handler.next(options);
       },
     );
   }

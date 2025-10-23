@@ -34,11 +34,11 @@ Map<String, dynamic> _$ApiResponseToJson<T>(
 
 PaginationMeta _$PaginationMetaFromJson(Map<String, dynamic> json) =>
     PaginationMeta(
-      total: (json['total'] as num).toInt(),
-      items: (json['items'] as num).toInt(),
-      currentPage: (json['currentPage'] as num).toInt(),
-      perPage: (json['perPage'] as num).toInt(),
-      lastPage: (json['lastPage'] as num).toInt(),
+      total: (json['total'] as num?)?.toInt(),
+      items: (json['items'] as num?)?.toInt(),
+      currentPage: (json['currentPage'] as num?)?.toInt(),
+      perPage: (json['perPage'] as num?)?.toInt(),
+      lastPage: (json['lastPage'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$PaginationMetaToJson(PaginationMeta instance) =>

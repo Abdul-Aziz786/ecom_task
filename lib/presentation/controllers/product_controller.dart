@@ -72,10 +72,15 @@ class ProductController extends GetxController {
         final nextPageKey = pageKey + 1;
         pagingController.appendPage(products, nextPageKey);
       }
-    } catch (error) {
+    } catch (error, stackTrace) {
       hasError.value = true;
       errorMessage.value = error.toString();
       pagingController.error = error;
+
+      // Print detailed error to console
+      print('❌ Error fetching products (page $pageKey):');
+      print('Error: $error');
+      print('StackTrace: $stackTrace');
     }
   }
 

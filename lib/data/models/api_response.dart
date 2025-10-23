@@ -31,11 +31,11 @@ class ApiResponse<T> {
 
 @JsonSerializable()
 class PaginationMeta {
-  final int total;
-  final int items;
-  final int currentPage;
-  final int perPage;
-  final int lastPage;
+  final int? total;
+  final int? items;
+  final int? currentPage;
+  final int? perPage;
+  final int? lastPage;
 
   PaginationMeta({
     required this.total,

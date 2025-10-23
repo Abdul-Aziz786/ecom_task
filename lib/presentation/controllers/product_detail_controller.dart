@@ -25,16 +25,8 @@ class ProductDetailController extends GetxController {
     // Get product from arguments
     final Product? passedProduct = Get.arguments as Product?;
 
-    if (passedProduct != null) {
-      // Set initial product for immediate display
-      // product.value = passedProduct;
-
-      // Set initial selections
-      selectedSize.value = passedProduct.sizes?.first;
-      selectedColor.value = passedProduct.colors?.first;
-
-      // Load full product details
-      loadProductDetails(passedProduct.handle);
+    if (passedProduct != null && passedProduct.handle != null) {
+      loadProductDetails(passedProduct.handle!);
     }
   }
 
@@ -57,9 +49,14 @@ class ProductDetailController extends GetxController {
       if (selectedColor.value == null && colors != null && colors.isNotEmpty) {
         selectedColor.value = colors.first;
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       hasError.value = true;
       errorMessage.value = e.toString();
+
+      // Print detailed error to console
+      print('❌ Error loading product details:');
+      print('Error: $e');
+      print('StackTrace: $stackTrace');
     } finally {
       isLoading.value = false;
     }
@@ -127,7 +124,7 @@ class ProductDetailController extends GetxController {
   // Retry loading
   void retry() {
     if (product.value?.handle != null) {
-      loadProductDetails(product.value!.handle);
+      loadProductDetails(product.value!.handle!);
     }
   }
 }

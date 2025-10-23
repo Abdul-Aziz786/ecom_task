@@ -39,9 +39,11 @@ class ProductRemoteDataSource {
         sortBy: sortBy,
       );
       return response.data.data; // Unwrap the data from ApiResponse
-    } catch (e, st) {
-      print(st);
-      throw Exception('Failed to fetch products: $e');
+    } catch (e, stackTrace) {
+      print('❌ API Error in getProducts:');
+      print('Error: $e');
+      print('StackTrace: $stackTrace');
+      rethrow; // Re-throw to let upper layers handle it
     }
   }
 
@@ -50,8 +52,12 @@ class ProductRemoteDataSource {
     try {
       final response = await _apiService.getProductByHandler(handler);
       return response.data.data; // Unwrap the data from ApiResponse
-    } catch (e) {
-      throw Exception('Failed to fetch product: $e');
+    } catch (e, stackTrace) {
+      print('❌ API Error in getProductByHandler:');
+      print('Handler: $handler');
+      print('Error: $e');
+      print('StackTrace: $stackTrace');
+      rethrow; // Re-throw to let upper layers handle it
     }
   }
 
@@ -74,9 +80,12 @@ class ProductRemoteDataSource {
         attributes: searchData.attributes,
         ratingsCounts: searchData.ratingsCounts,
       );
-    } catch (e, st) {
-      print(st);
-      throw Exception('Failed to search products: $e');
+    } catch (e, stackTrace) {
+      print('❌ API Error in searchProducts:');
+      print('Query: $query, Page: $page, Limit: $limit');
+      print('Error: $e');
+      print('StackTrace: $stackTrace');
+      rethrow; // Re-throw to let upper layers handle it
     }
   }
 }

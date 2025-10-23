@@ -2,30 +2,38 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'product_model.g.dart';
 
+// Helper function to safely convert dynamic to num
+num? _toNum(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value;
+  if (value is String) return num.tryParse(value);
+  return null;
+}
+
 @JsonSerializable(explicitToJson: true)
 class Product {
-  final String id;
-  final String title;
+  final String? id;
+  final String? title;
   final String? subtitle;
   final String? description;
   final String? thumbnail;
-  final String handle;
+  final String? handle;
   final String? metaTitle;
   final String? metaDescription;
-  final String status;
+  final String? status;
   final String? brandId;
-  final String visibility;
-  final int reviewsCount;
+  final String? visibility;
+  final int? reviewsCount;
   final double? averageRating;
-  final int ordersCount;
-  final DateTime createdAt;
+  final int? ordersCount;
+  final DateTime? createdAt;
   final DateTime? updatedAt;
   final DateTime? publishedAt;
-  final List<ProductImage> productImages;
-  final List<ProductVariant> variants;
-  final List<ProductCategory> productCategories;
-  final List<dynamic> productCollections;
-  final List<ProductTag> tags;
+  final List<ProductImage>? productImages;
+  final List<ProductVariant>? variants;
+  final List<ProductCategory>? productCategories;
+  final List<dynamic>? productCollections;
+  final List<ProductTag>? tags;
   final double? priceStart;
   final double? priceEnd;
   final Map<String, dynamic>? metadata;
@@ -59,28 +67,28 @@ class Product {
   final List<dynamic>? prices;
 
   Product({
-    required this.id,
-    required this.title,
+    this.id,
+    this.title,
     this.subtitle,
     this.description,
     this.thumbnail,
-    required this.handle,
+    this.handle,
     this.metaTitle,
     this.metaDescription,
-    required this.status,
+    this.status,
     this.brandId,
-    required this.visibility,
-    required this.reviewsCount,
+    this.visibility,
+    this.reviewsCount,
     this.averageRating,
-    required this.ordersCount,
-    required this.createdAt,
-    required this.updatedAt,
+    this.ordersCount,
+    this.createdAt,
+    this.updatedAt,
     this.publishedAt,
-    required this.productImages,
-    required this.variants,
-    required this.productCategories,
-    required this.productCollections,
-    required this.tags,
+    this.productImages,
+    this.variants,
+    this.productCategories,
+    this.productCollections,
+    this.tags,
     this.priceStart,
     this.priceEnd,
     this.metadata,
@@ -115,8 +123,8 @@ class Product {
   double get effectivePrice => priceStart ?? 0.0;
 
   double? get discountPrice {
-    if (variants.isEmpty) return null;
-    final firstVariant = variants.first;
+    if (variants == null || variants!.isEmpty) return null;
+    final firstVariant = variants!.first;
     if (firstVariant.specialPrice != null) {
       return firstVariant.specialPrice!.toDouble();
     }
@@ -124,41 +132,51 @@ class Product {
   }
 
   int get discountPercentage {
-    if (variants.isEmpty || variants.first.specialPrice == null) return 0;
-    final original = variants.first.originalPrice.toDouble();
-    final special = variants.first.specialPrice!.toDouble();
-    if (original <= special) return 0;
+    if (variants == null ||
+        variants!.isEmpty ||
+        variants!.first.specialPrice == null)
+      return 0;
+    final original = variants!.first.originalPrice?.toDouble();
+    final special = variants!.first.specialPrice!.toDouble();
+    if (original == null || original <= special) return 0;
     return ((original - special) / original * 100).round();
   }
 
   bool get hasDiscount {
-    return variants.isNotEmpty && variants.first.specialPrice != null;
+    return variants != null &&
+        variants!.isNotEmpty &&
+        variants!.first.specialPrice != null;
   }
 
   bool get isAvailable {
     return status == 'ACTIVE' &&
-        variants.isNotEmpty &&
-        variants.any(
+        variants != null &&
+        variants!.isNotEmpty &&
+        variants!.any(
           (v) =>
-              v.inventoryQuantity > 0 ||
+              (v.inventoryQuantity ?? 0) > 0 ||
               (v.allowBackOrder ?? false) ||
               !(v.manageInventory ?? false),
         );
   }
 
   int get stock {
-    if (variants.isEmpty) return 0;
-    return variants.fold(0, (sum, v) => sum + v.inventoryQuantity);
+    if (variants == null || variants!.isEmpty) return 0;
+    return variants!.fold(0, (sum, v) => sum + (v.inventoryQuantity ?? 0));
   }
 
   List<String> get images {
-    return productImages.map((e) => e.image).toList();
+    return productImages
+            ?.map((e) => e.image ?? '')
+            .where((img) => img.isNotEmpty)
+            .toList() ??
+        [];
   }
 
   List<String>? get sizes {
-    if (variants.isEmpty) return null;
+    if (variants == null || variants!.isEmpty) return null;
     final sizeOptions = <String>{};
-    for (var variant in variants) {
+    for (var variant in variants!) {
       for (var optionValue in variant.optionValues ?? []) {
         if (optionValue.productOption?.title.toLowerCase().contains('size') ??
             false) {
@@ -170,9 +188,9 @@ class Product {
   }
 
   List<String>? get colors {
-    if (variants.isEmpty) return null;
+    if (variants == null || variants!.isEmpty) return null;
     final colorOptions = <String>{};
-    for (var variant in variants) {
+    for (var variant in variants!) {
       for (var optionValue in variant.optionValues ?? []) {
         final title = optionValue.productOption?.title.toLowerCase();
         if (title != null &&
@@ -184,32 +202,34 @@ class Product {
     return colorOptions.isEmpty ? null : colorOptions.toList();
   }
 
-  String get name => title;
+  String get name => title ?? '';
   String get categoryName =>
-      productCategories.isNotEmpty ? productCategories.first.category.name : '';
+      productCategories != null && productCategories!.isNotEmpty
+      ? productCategories!.first.category?.name ?? ''
+      : '';
   double get rating => averageRating ?? 0.0;
-  int get reviewCount => reviewsCount;
+  int get reviewCount => reviewsCount ?? 0;
   Map<String, dynamic>? get specifications => metadata;
 }
 
 @JsonSerializable(explicitToJson: true)
 class ProductImage {
-  final String id;
+  final String? id;
   final String? productId;
   final int? order;
-  final String image;
+  final String? image;
   final String? productVariantId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
   ProductImage({
-    required this.id,
+    this.id,
     this.productId,
-    required this.order,
-    required this.image,
+    this.order,
+    this.image,
     this.productVariantId,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory ProductImage.fromJson(Map<String, dynamic> json) =>
@@ -220,17 +240,19 @@ class ProductImage {
 
 @JsonSerializable(explicitToJson: true)
 class ProductVariant {
-  final String id;
+  final String? id;
   final String? productId;
   final String? sku;
   final String? barcode;
-  final num price;
+  @JsonKey(fromJson: _toNum)
+  final num? price;
+  @JsonKey(fromJson: _toNum)
   final num? specialPrice;
   final DateTime? specialPriceStartDate;
   final DateTime? specialPriceEndDate;
   final String? title;
   final String? thumbnail;
-  final int inventoryQuantity;
+  final int? inventoryQuantity;
   final bool? manageInventory;
   final bool? allowBackOrder;
   final int? variantRank;
@@ -238,8 +260,10 @@ class ProductVariant {
   final DateTime? updatedAt;
   final List<VariantImage>? images;
   final List<OptionValue>? optionValues;
-  final num originalPrice;
-  final num currentPrice;
+  @JsonKey(fromJson: _toNum)
+  final num? originalPrice;
+  @JsonKey(fromJson: _toNum)
+  final num? currentPrice;
   final List<dynamic>? prices;
   final Map<String, dynamic>? metadata;
   final String? deletedAt;
@@ -258,29 +282,30 @@ class ProductVariant {
   final String? easyecomId;
   final String? easyecomSku;
   final Map<String, dynamic>? salePrices;
+  @JsonKey(fromJson: _toNum)
   final num? specialPriceActive;
 
   ProductVariant({
-    required this.id,
-    required this.productId,
+    this.id,
+    this.productId,
     this.sku,
     this.barcode,
-    required this.price,
+    this.price,
     this.specialPrice,
     this.specialPriceStartDate,
     this.specialPriceEndDate,
     this.title,
     this.thumbnail,
-    required this.inventoryQuantity,
-    required this.manageInventory,
-    required this.allowBackOrder,
-    required this.variantRank,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.images,
-    required this.optionValues,
-    required this.originalPrice,
-    required this.currentPrice,
+    this.inventoryQuantity,
+    this.manageInventory,
+    this.allowBackOrder,
+    this.variantRank,
+    this.createdAt,
+    this.updatedAt,
+    this.images,
+    this.optionValues,
+    this.originalPrice,
+    this.currentPrice,
     this.prices,
     this.metadata,
     this.deletedAt,
@@ -308,29 +333,29 @@ class ProductVariant {
   Map<String, dynamic> toJson() => _$ProductVariantToJson(this);
 
   bool get availableForSale =>
-      inventoryQuantity > 0 ||
+      (inventoryQuantity ?? 0) > 0 ||
       (allowBackOrder ?? false) ||
       !(manageInventory ?? false);
 }
 
 @JsonSerializable()
 class VariantImage {
-  final String id;
+  final String? id;
   final String? productId;
-  final int order;
-  final String image;
+  final int? order;
+  final String? image;
   final String? productVariantId;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   VariantImage({
-    required this.id,
+    this.id,
     this.productId,
-    required this.order,
-    required this.image,
+    this.order,
+    this.image,
     this.productVariantId,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory VariantImage.fromJson(Map<String, dynamic> json) =>
@@ -341,24 +366,24 @@ class VariantImage {
 
 @JsonSerializable(explicitToJson: true)
 class OptionValue {
-  final String id;
-  final String optionId;
-  final String value;
+  final String? id;
+  final String? optionId;
+  final String? value;
   final String? variantId;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
   final String? deletedAt;
   final String? createdById;
   final Map<String, dynamic>? metadata;
   final ProductOption? productOption;
 
   OptionValue({
-    required this.id,
-    required this.optionId,
-    required this.value,
+    this.id,
+    this.optionId,
+    this.value,
     this.variantId,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
     this.deletedAt,
     this.createdById,
     this.metadata,
@@ -373,22 +398,22 @@ class OptionValue {
 
 @JsonSerializable(explicitToJson: true)
 class ProductOption {
-  final String id;
-  final String productId;
-  final String title;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String? id;
+  final String? productId;
+  final String? title;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
   final String? deletedAt;
   final String? createdById;
   final Map<String, dynamic>? metadata;
   final List<OptionValue>? values;
 
   ProductOption({
-    required this.id,
-    required this.productId,
-    required this.title,
-    required this.createdAt,
-    required this.updatedAt,
+    this.id,
+    this.productId,
+    this.title,
+    this.createdAt,
+    this.updatedAt,
     this.deletedAt,
     this.createdById,
     this.metadata,
@@ -403,9 +428,9 @@ class ProductOption {
 
 @JsonSerializable(explicitToJson: true)
 class ProductCategory {
-  final Category category;
+  final Category? category;
 
-  ProductCategory({required this.category});
+  ProductCategory({this.category});
 
   factory ProductCategory.fromJson(Map<String, dynamic> json) =>
       _$ProductCategoryFromJson(json);
@@ -415,17 +440,12 @@ class ProductCategory {
 
 @JsonSerializable(explicitToJson: true)
 class Category {
-  final String id;
-  final String name;
-  final String handle;
+  final String? id;
+  final String? name;
+  final String? handle;
   final Category? parent;
 
-  Category({
-    required this.id,
-    required this.name,
-    required this.handle,
-    this.parent,
-  });
+  Category({this.id, this.name, this.handle, this.parent});
 
   factory Category.fromJson(Map<String, dynamic> json) =>
       _$CategoryFromJson(json);
@@ -435,10 +455,10 @@ class Category {
 
 @JsonSerializable()
 class ProductBrand {
-  final String id;
-  final String title;
+  final String? id;
+  final String? title;
   final String? description;
-  final String handle;
+  final String? handle;
   final String? image;
   final String? status;
   final DateTime? createdAt;
@@ -448,14 +468,14 @@ class ProductBrand {
   final String? createdById;
 
   ProductBrand({
-    required this.id,
-    required this.title,
+    this.id,
+    this.title,
     this.description,
-    required this.handle,
+    this.handle,
     this.image,
-    required this.status,
-    required this.createdAt,
-    required this.updatedAt,
+    this.status,
+    this.createdAt,
+    this.updatedAt,
     this.deletedAt,
     this.metadata,
     this.createdById,
@@ -469,24 +489,24 @@ class ProductBrand {
 
 @JsonSerializable()
 class ProductTab {
-  final String id;
-  final String productId;
-  final String title;
-  final String content;
-  final int position;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String? id;
+  final String? productId;
+  final String? title;
+  final String? content;
+  final int? position;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
   final String? deletedAt;
   final Map<String, dynamic>? metadata;
 
   ProductTab({
-    required this.id,
-    required this.productId,
-    required this.title,
-    required this.content,
-    required this.position,
-    required this.createdAt,
-    required this.updatedAt,
+    this.id,
+    this.productId,
+    this.title,
+    this.content,
+    this.position,
+    this.createdAt,
+    this.updatedAt,
     this.deletedAt,
     this.metadata,
   });
@@ -502,14 +522,9 @@ class ProductTag {
   final String? id;
   final String? productId;
   final String? tagId;
-  final Tag tag;
+  final Tag? tag;
 
-  ProductTag({
-    required this.id,
-    required this.productId,
-    required this.tagId,
-    required this.tag,
-  });
+  ProductTag({this.id, this.productId, this.tagId, this.tag});
 
   factory ProductTag.fromJson(Map<String, dynamic> json) =>
       _$ProductTagFromJson(json);
@@ -519,9 +534,9 @@ class ProductTag {
 
 @JsonSerializable()
 class Tag {
-  final String id;
-  final String title;
-  final String slug;
+  final String? id;
+  final String? title;
+  final String? slug;
   final String? description;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -529,12 +544,12 @@ class Tag {
   final String? createdById;
 
   Tag({
-    required this.id,
-    required this.title,
-    required this.slug,
+    this.id,
+    this.title,
+    this.slug,
     this.description,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
     this.deletedAt,
     this.createdById,
   });
@@ -547,13 +562,13 @@ class Tag {
 @JsonSerializable(explicitToJson: true)
 class ProductAttributeValue {
   final String? value;
-  final ProductAttribute productAttribute;
-  final AttributeValue productAttributeValue;
+  final ProductAttribute? productAttribute;
+  final AttributeValue? productAttributeValue;
 
   ProductAttributeValue({
     this.value,
-    required this.productAttribute,
-    required this.productAttributeValue,
+    this.productAttribute,
+    this.productAttributeValue,
   });
 
   factory ProductAttributeValue.fromJson(Map<String, dynamic> json) =>
@@ -564,10 +579,10 @@ class ProductAttributeValue {
 
 @JsonSerializable()
 class ProductAttribute {
-  final String code;
-  final String title;
+  final String? code;
+  final String? title;
 
-  ProductAttribute({required this.code, required this.title});
+  ProductAttribute({this.code, this.title});
 
   factory ProductAttribute.fromJson(Map<String, dynamic> json) =>
       _$ProductAttributeFromJson(json);
@@ -577,9 +592,9 @@ class ProductAttribute {
 
 @JsonSerializable()
 class AttributeValue {
-  final String value;
+  final String? value;
 
-  AttributeValue({required this.value});
+  AttributeValue({this.value});
 
   factory AttributeValue.fromJson(Map<String, dynamic> json) =>
       _$AttributeValueFromJson(json);

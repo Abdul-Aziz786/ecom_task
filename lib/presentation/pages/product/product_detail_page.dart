@@ -52,7 +52,22 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           body: const Center(child: CircularProgressIndicator()),
         );
       }
-
+      if (_controller.hasError.value) {
+        return Scaffold(
+          appBar: AppBar(title: const Text('Product Details')),
+          body: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Center(
+              child: Column(
+                children: [
+                  const Icon(Icons.error, size: 80, color: AppColors.error),
+                  Text(_controller.errorMessage.value),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
       if (product == null) {
         return Scaffold(
           appBar: AppBar(title: const Text('Product Details')),
@@ -134,7 +149,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           itemCount: images.length,
           itemBuilder: (context, index, realIndex) {
             return CachedNetworkImage(
-              imageUrl: '${AppConstants.imageBaseUrl}${images[index]}',
+              imageUrl: '${AppConstants.imageBaseUrl}/${images[index]}',
               fit: BoxFit.cover,
               placeholder: (context, url) => Container(
                 color: Colors.grey[200],
@@ -218,9 +233,11 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                 ),
               ),
               const SizedBox(width: 16),
-              if (product.hasDiscount)
+              if (product.hasDiscount &&
+                  product.variants != null &&
+                  product.variants!.isNotEmpty)
                 Text(
-                  '\$${(product.variants.first.originalPrice).toStringAsFixed(2)}',
+                  '\$${(product.variants!.first.originalPrice ?? 0).toStringAsFixed(2)}',
                   style: TextStyle(
                     fontSize: 18,
                     decoration: TextDecoration.lineThrough,
@@ -501,16 +518,18 @@ class _ProductDetailPageState extends State<ProductDetailPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSpecRow('Product ID', product.id),
+          _buildSpecRow('Product ID', product.id ?? 'N/A'),
           _buildSpecRow('Category', product.categoryName),
           _buildSpecRow(
             'Price',
             '\$${product.effectivePrice.toStringAsFixed(2)}',
           ),
-          if (product.discountPrice != null)
+          if (product.discountPrice != null &&
+              product.variants != null &&
+              product.variants!.isNotEmpty)
             _buildSpecRow(
               'Original Price',
-              '\$${(product.variants.first.originalPrice).toStringAsFixed(2)}',
+              '\$${(product.variants!.first.originalPrice ?? 0).toStringAsFixed(2)}',
             ),
           _buildSpecRow('Rating', '${product.rating}/5.0'),
           _buildSpecRow('Reviews', '${product.reviewCount} reviews'),
