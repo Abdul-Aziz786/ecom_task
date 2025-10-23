@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import '../../data/models/product_model.dart';
 import '../controllers/product_controller.dart';
 
@@ -211,7 +212,32 @@ class _ProductListPageState extends State<ProductListPage> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
+
+                  // Star Rating
+                  if (product.rating > 0)
+                    Row(
+                      children: [
+                        RatingBarIndicator(
+                          rating: product.rating,
+                          itemBuilder: (context, index) =>
+                              const Icon(Icons.star, color: Colors.amber),
+                          itemCount: 5,
+                          itemSize: 16.0,
+                          direction: Axis.horizontal,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${product.rating.toStringAsFixed(1)} (${product.reviewCount})',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                  const SizedBox(height: 6),
                   Text(
                     '\$${product.effectivePrice.toStringAsFixed(2)}',
                     style: TextStyle(
