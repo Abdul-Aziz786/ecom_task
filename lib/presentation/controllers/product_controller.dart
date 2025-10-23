@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import '../../data/models/product_model.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../data/models/api_response.dart';
@@ -6,9 +7,11 @@ import '../../data/models/api_response.dart';
 class ProductController extends GetxController {
   final ProductRepository _productRepository = ProductRepository();
 
-  final RxList<Product> allProducts = <Product>[].obs;
-  final RxBool isLoading = false.obs;
-  final RxBool isLoadingMore = false.obs;
+  // Pagination controller
+  final PagingController<int, Product> pagingController = PagingController(
+    firstPageKey: 1,
+  );
+
   final RxBool hasError = false.obs;
   final RxString errorMessage = ''.obs;
   final Rx<Product?> selectedProduct = Rx<Product?>(null);
@@ -18,96 +21,100 @@ class ProductController extends GetxController {
   final RxList<AttributeSummary> attributes = <AttributeSummary>[].obs;
   final Rx<Map<String, int>?> ratingsCounts = Rx<Map<String, int>?>(null);
 
-  int currentPage = 1;
-  bool hasMore = true;
+  // Search query
+  final RxString searchQuery = ''.obs;
+
+  static const _pageSize = 10;
 
   @override
   void onInit() {
     super.onInit();
-    loadInitialData();
+    pagingController.addPageRequestListener(_fetchPage);
+
+    // Setup debounced search using GetX's Worker
+    debounce(
+      searchQuery,
+      (_) => _refreshPagination(),
+      time: const Duration(milliseconds: 500),
+    );
   }
 
-  // Load initial data
-  Future<void> loadInitialData() async {
-    isLoading.value = true;
-    hasError.value = false;
-    try {
-      await loadAllProducts();
-    } catch (e) {
-      hasError.value = true;
-      errorMessage.value = e.toString();
-    } finally {
-      isLoading.value = false;
-    }
+  @override
+  void onClose() {
+    pagingController.dispose();
+    super.onClose();
   }
 
-  // Load all products
-  Future<void> loadAllProducts({bool refresh = false}) async {
-    if (refresh) {
-      currentPage = 1;
-      hasMore = true;
-      allProducts.clear();
-    }
-
+  // Fetch page data
+  Future<void> _fetchPage(int pageKey) async {
     try {
-      final result = await _productRepository.searchProducts(page: currentPage);
+      hasError.value = false;
 
-      if (result.products.isEmpty) {
-        hasMore = false;
-      } else {
-        allProducts.addAll(result.products);
+      final result = await _productRepository.searchProducts(
+        page: pageKey,
+        limit: _pageSize,
+        query: searchQuery.value.isEmpty ? null : searchQuery.value,
+      );
 
-        // Update search metadata
-        if (result.brands != null) brands.value = result.brands!;
-        if (result.attributes != null) attributes.value = result.attributes!;
-        if (result.ratingsCounts != null)
-          ratingsCounts.value = result.ratingsCounts;
-
-        currentPage++;
+      // Update search metadata
+      if (result.brands != null) brands.value = result.brands!;
+      if (result.attributes != null) attributes.value = result.attributes!;
+      if (result.ratingsCounts != null) {
+        ratingsCounts.value = result.ratingsCounts;
       }
-    } catch (e, st) {
-      print(e);
-      print(st);
+
+      final products = result.products;
+      final isLastPage = products.length < _pageSize;
+
+      if (isLastPage) {
+        pagingController.appendLastPage(products);
+      } else {
+        final nextPageKey = pageKey + 1;
+        pagingController.appendPage(products, nextPageKey);
+      }
+    } catch (error) {
       hasError.value = true;
-      errorMessage.value = e.toString();
+      errorMessage.value = error.toString();
+      pagingController.error = error;
     }
+  }
+
+  // Refresh pagination (used by debounced search)
+  void _refreshPagination() {
+    pagingController.refresh();
+  }
+
+  // Update search query (will trigger debounced search)
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+  }
+
+  // Clear search
+  void clearSearch() {
+    searchQuery.value = '';
+    pagingController.refresh();
+  }
+
+  // Refresh products (for pull to refresh)
+  void refreshProducts() {
+    pagingController.refresh();
+  }
+
+  // Retry on error
+  void retry() {
+    hasError.value = false;
+    errorMessage.value = '';
+    pagingController.retryLastFailedRequest();
   }
 
   // Get product details by handler
   Future<void> getProductDetails(String handler) async {
     try {
-      isLoading.value = true;
       final product = await _productRepository.getProductByHandler(handler);
       selectedProduct.value = product;
     } catch (e) {
       hasError.value = true;
       errorMessage.value = e.toString();
-    } finally {
-      isLoading.value = false;
     }
-  }
-
-  // Load more products for infinite scroll
-  Future<void> loadMore() async {
-    if (isLoadingMore.value || !hasMore) return;
-
-    isLoadingMore.value = true;
-    await loadAllProducts(refresh: false);
-    isLoadingMore.value = false;
-  }
-
-  // Refresh products
-  Future<void> refreshProducts() async {
-    currentPage = 1;
-    hasMore = true;
-    allProducts.clear();
-    await loadInitialData();
-  }
-
-  // Retry on error
-  Future<void> retry() async {
-    hasError.value = false;
-    errorMessage.value = '';
-    await loadInitialData();
   }
 }

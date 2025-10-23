@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import '../../data/models/product_model.dart';
 import '../controllers/product_controller.dart';
 
@@ -16,80 +17,137 @@ class ProductListPage extends StatefulWidget {
 
 class _ProductListPageState extends State<ProductListPage> {
   final ProductController _controller = Get.put(ProductController());
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent * 0.9) {
-      _controller.loadMore();
-    }
-  }
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Products'),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => _controller.refreshProducts(),
-            tooltip: 'Refresh',
-          ),
-        ],
-      ),
-      body: Obx(() {
-        // Loading state
-        if (_controller.isLoading.value && _controller.allProducts.isEmpty) {
-          return _buildShimmerLoading();
-        }
-
-        // Error state
-        if (_controller.hasError.value && _controller.allProducts.isEmpty) {
-          return _buildErrorState();
-        }
-
-        // Empty state
-        if (_controller.allProducts.isEmpty) {
-          return _buildEmptyState();
-        }
-
-        // Product list
-        return RefreshIndicator(
-          onRefresh: () async => await _controller.refreshProducts(),
-          child: GridView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.7,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Products'),
+          elevation: 0,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () => _controller.refreshProducts(),
+              tooltip: 'Refresh',
             ),
-            itemCount:
-                _controller.allProducts.length + (_controller.hasMore ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == _controller.allProducts.length) {
-                return _buildLoadingMore();
+          ],
+        ),
+        body: Column(
+          children: [
+            // Search Bar
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search products...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: Obx(
+                    () => _controller.searchQuery.value.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              _controller.clearSearch();
+                            },
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+                onChanged: (value) => _controller.updateSearchQuery(value),
+                onSubmitted: (value) {
+                  FocusScope.of(context).unfocus();
+                },
+              ),
+            ),
+
+            // Search Results Info
+            Obx(() {
+              if (_controller.searchQuery.value.isNotEmpty &&
+                  _controller.pagingController.itemList != null) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  color: Colors.grey[100],
+                  child: Row(
+                    children: [
+                      Text(
+                        'Search results for "${_controller.searchQuery.value}"',
+                        style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${_controller.pagingController.itemList!.length} items',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               }
-              return _buildProductCard(_controller.allProducts[index]);
-            },
-          ),
-        );
-      }),
+              return const SizedBox.shrink();
+            }),
+
+            // Product List with Infinite Scroll
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  _controller.refreshProducts();
+                },
+                child: PagedGridView<int, Product>(
+                  pagingController: _controller.pagingController,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  builderDelegate: PagedChildBuilderDelegate<Product>(
+                    itemBuilder: (context, product, index) =>
+                        _buildProductCard(product),
+                    firstPageErrorIndicatorBuilder: (context) =>
+                        _buildErrorState(),
+                    noItemsFoundIndicatorBuilder: (context) =>
+                        _buildEmptyState(),
+                    firstPageProgressIndicatorBuilder: (context) =>
+                        _buildShimmerLoading(),
+                    newPageProgressIndicatorBuilder: (context) =>
+                        _buildLoadingMore(),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -282,6 +340,8 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 
   Widget _buildEmptyState() {
+    final isSearching = _controller.searchQuery.value.isNotEmpty;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -289,13 +349,13 @@ class _ProductListPageState extends State<ProductListPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.shopping_bag_outlined,
+              isSearching ? Icons.search_off : Icons.shopping_bag_outlined,
               size: 64,
               color: Colors.grey[400],
             ),
             const SizedBox(height: 16),
             Text(
-              'No Products Found',
+              isSearching ? 'No Results Found' : 'No Products Found',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -304,9 +364,22 @@ class _ProductListPageState extends State<ProductListPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Check back later for new items',
+              isSearching
+                  ? 'Try adjusting your search terms'
+                  : 'Check back later for new items',
               style: TextStyle(color: Colors.grey[600]),
+              textAlign: TextAlign.center,
             ),
+            if (isSearching) ...[
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  _searchController.clear();
+                  _controller.clearSearch();
+                },
+                child: const Text('Clear Search'),
+              ),
+            ],
           ],
         ),
       ),
