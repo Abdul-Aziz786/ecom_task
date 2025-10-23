@@ -1,3 +1,4 @@
+import 'package:ecom/presentation/pages/home/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
@@ -19,7 +20,8 @@ class _SplashPageState extends State<SplashPage> {
 
   Future<void> _navigateToHome() async {
     await Future.delayed(const Duration(seconds: 2));
-    Get.offNamed(AppRoutes.productList);
+    // Get.offNamed(AppRoutes.productList);
+    Get.off(const HomePage());
   }
 
   @override
@@ -34,7 +36,7 @@ class _SplashPageState extends State<SplashPage> {
               const Icon(Icons.shopping_bag, size: 100, color: AppColors.white),
               const SizedBox(height: 24),
               Text(
-                'ECommerce Pro',
+                'ECommerce',
                 style: Theme.of(context).textTheme.displayMedium?.copyWith(
                   color: AppColors.white,
                   fontWeight: FontWeight.bold,
