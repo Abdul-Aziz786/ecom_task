@@ -110,15 +110,6 @@ class _ProductListPageState extends State<ProductListPage> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 8),
-                        Text(
-                          '${_controller.pagingController.itemList!.length} items',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
                       ],
                     ),
                   );

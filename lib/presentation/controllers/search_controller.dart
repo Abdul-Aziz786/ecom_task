@@ -13,24 +13,46 @@ class SearchController extends GetxController {
   );
   final RxString errorMessage = ''.obs;
 
-  /// Fetch search suggestions based on query
+  @override
+  void onInit() {
+    super.onInit();
+    // Set up debounce for search query
+    debounce(
+      searchQuery,
+      (_) => _performSearch(),
+      time: const Duration(milliseconds: 500),
+    );
+  }
+
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+  }
+
+  Future<void> _performSearch() async {
+    await _fetchSuggestionsInternal(searchQuery.value);
+  }
+
   Future<void> fetchSuggestions(String query) async {
-    if (query.trim().isEmpty) {
+    searchQuery.value = query;
+    await _fetchSuggestionsInternal(query);
+  }
+
+  Future<void> _fetchSuggestionsInternal(String query) async {
+    final trimmedQuery = query.trim();
+    if (trimmedQuery.isEmpty) {
       suggestionData.value = null;
-      searchQuery.value = '';
       return;
     }
 
     try {
-      searchQuery.value = query;
       isLoading.value = true;
       errorMessage.value = '';
 
-      final data = await _dataSource.getSearchSuggestions(query);
+      final data = await _dataSource.getSearchSuggestions(trimmedQuery);
       suggestionData.value = data;
     } catch (e, stackTrace) {
       print('❌ Error fetching search suggestions:');
-      print('Query: $query');
+      print('Query: $trimmedQuery');
       print('Error: $e');
       print('StackTrace: $stackTrace');
       errorMessage.value = 'Failed to load suggestions';

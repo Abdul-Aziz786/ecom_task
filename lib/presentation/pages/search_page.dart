@@ -122,11 +122,8 @@ class _SearchPageState extends State<SearchPage> {
                 controller: _textController,
                 focusNode: _focusNode,
                 onChanged: (value) {
-                  if (value.trim().isNotEmpty) {
-                    _controller.fetchSuggestions(value);
-                  } else {
-                    _controller.clearSearch();
-                  }
+                  // Use debounced search
+                  _controller.updateSearchQuery(value);
                 },
                 onSubmitted: (value) {
                   // Submit search and return to product list page
