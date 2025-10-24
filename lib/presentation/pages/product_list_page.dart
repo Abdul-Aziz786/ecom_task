@@ -100,14 +100,17 @@ class _ProductListPageState extends State<ProductListPage> {
                     color: Colors.grey[100],
                     child: Row(
                       children: [
-                        Text(
-                          'Search results for "${_controller.searchQuery.value}"',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[700],
+                        Expanded(
+                          child: Text(
+                            'Search results for "${_controller.searchQuery.value}"',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[700],
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ),
-                        const Spacer(),
+                        SizedBox(width: 8),
                         Text(
                           '${_controller.pagingController.itemList!.length} items',
                           style: TextStyle(

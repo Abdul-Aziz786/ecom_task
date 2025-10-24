@@ -95,7 +95,7 @@ class ProductDetailController extends GetxController {
     Get.snackbar(
       isFavorite.value ? 'Added to Wishlist' : 'Removed from Wishlist',
       product.value?.name ?? '',
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       duration: const Duration(seconds: 2),
     );
   }
@@ -105,7 +105,7 @@ class ProductDetailController extends GetxController {
     Get.snackbar(
       'Share',
       'Share functionality coming soon',
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
     );
   }
 
@@ -116,7 +116,7 @@ class ProductDetailController extends GetxController {
     Get.snackbar(
       'Added to Cart',
       '${quantity.value}x ${product.value!.name}',
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       duration: const Duration(seconds: 2),
     );
   }
