@@ -2,6 +2,7 @@ import '../api/api_service.dart';
 import '../api/api_client.dart';
 import '../models/product_model.dart';
 import '../models/api_response.dart';
+import '../models/search_suggestion_model.dart';
 
 /// Search result with metadata for filters
 class ProductSearchResult {
@@ -83,6 +84,20 @@ class ProductRemoteDataSource {
     } catch (e, stackTrace) {
       print('❌ API Error in searchProducts:');
       print('Query: $query, Page: $page, Limit: $limit');
+      print('Error: $e');
+      print('StackTrace: $stackTrace');
+      rethrow; // Re-throw to let upper layers handle it
+    }
+  }
+
+  /// Get search suggestions from API
+  Future<SearchSuggestionData?> getSearchSuggestions(String query) async {
+    try {
+      final response = await _apiService.getSearchSuggestions(query);
+      return response.data; // Return the data from SearchSuggestionResponse
+    } catch (e, stackTrace) {
+      print('❌ API Error in getSearchSuggestions:');
+      print('Query: $query');
       print('Error: $e');
       print('StackTrace: $stackTrace');
       rethrow; // Re-throw to let upper layers handle it

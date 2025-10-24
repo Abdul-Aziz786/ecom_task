@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import '../models/product_model.dart';
 import '../models/api_response.dart';
+import '../models/search_suggestion_model.dart';
 
 part 'api_service.g.dart';
 
@@ -32,4 +33,10 @@ abstract class ApiService {
     @Query('limit') int? limit,
     @Query('inStock') bool? inStock = false,
   });
+
+  /// Get search suggestions
+  @GET('/store/product-search/suggestions')
+  Future<SearchSuggestionResponse> getSearchSuggestions(
+    @Query('q') String query,
+  );
 }

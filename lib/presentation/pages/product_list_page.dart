@@ -49,37 +49,42 @@ class _ProductListPageState extends State<ProductListPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search products...',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: Obx(
-                      () => _controller.searchQuery.value.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _searchController.clear();
-                                _controller.clearSearch();
-                              },
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                child: GestureDetector(
+                  onTap: () async {
+                    // Open search page with current search text and wait for result
+                    final result = await Get.toNamed(
+                      '/search',
+                      arguments: _searchController.text,
+                    );
+                    if (result != null && result is String) {
+                      // Update search field with selected text (or clear if empty)
+                      _searchController.text = result;
+                      if (result.isEmpty) {
+                        _controller.clearSearch();
+                      } else {
+                        _controller.updateSearchQuery(result);
+                      }
+                    }
+                  },
+                  child: AbsorbPointer(
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search products...',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
                     ),
                   ),
-                  onChanged: (value) => _controller.updateSearchQuery(value),
-                  onSubmitted: (value) {
-                    FocusScope.of(context).unfocus();
-                  },
                 ),
               ),
 

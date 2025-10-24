@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../presentation/pages/splash_page.dart';
 import '../presentation/pages/product_list_page.dart';
 import '../presentation/pages/product/product_detail_page.dart';
+import '../presentation/pages/search_page.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -12,5 +13,6 @@ class AppPages {
       name: AppRoutes.productDetail,
       page: () => const ProductDetailPage(),
     ),
+    GetPage(name: AppRoutes.search, page: () => const SearchPage()),
   ];
 }
