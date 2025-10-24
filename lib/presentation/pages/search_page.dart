@@ -1,4 +1,5 @@
 import 'package:ecom/core/constants/app_constants.dart';
+import 'package:ecom/data/models/search_suggestion_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/search_controller.dart' as app;
@@ -34,6 +35,8 @@ class _SearchPageState extends State<SearchPage> {
     Future.delayed(const Duration(milliseconds: 100), () {
       _focusNode.requestFocus();
     });
+
+    print("Initialized Search Page");
   }
 
   @override
@@ -222,7 +225,7 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  Widget _buildSearchResults(data) {
+  Widget _buildSearchResults(SearchSuggestionData data) {
     final suggestions = data.suggestions ?? [];
     final products = data.products ?? [];
 

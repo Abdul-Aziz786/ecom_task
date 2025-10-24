@@ -46,10 +46,4 @@ class SearchController extends GetxController {
     suggestionData.value = null;
     errorMessage.value = '';
   }
-
-  @override
-  void onClose() {
-    // Clean up resources
-    super.onClose();
-  }
 }
